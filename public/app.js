@@ -90,6 +90,8 @@ const waterCatchesList = document.getElementById("water-catches-list");
 const locationStatus = document.getElementById("location-status");
 const infoScreen = document.getElementById("info-screen");
 const updateBanner = document.getElementById("update-banner");
+let publicFeedbackEmail = "";
+fetch("/api/public-config").then(response => response.ok ? response.json() : null).then(value => { publicFeedbackEmail = value?.feedbackEmail || ""; }).catch(() => {});
 const removeLocationButton = document.getElementById("btn-remove-location");
 
 let selectedFile = null;
@@ -728,6 +730,10 @@ document.getElementById("btn-info").addEventListener("click", () => { hideAllScr
 document.getElementById("btn-info-back").addEventListener("click", showHome);
 document.getElementById("btn-reload-app").addEventListener("click", () => window.location.reload());
 document.getElementById("btn-copy-feedback").addEventListener("click", async () => { const text=document.getElementById("feedback-text").value.trim(),status=document.getElementById("feedback-status");if(!text){status.textContent="Bitte schreibe zuerst eine Rückmeldung.";return;}try{await navigator.clipboard.writeText(text);status.textContent="Feedback kopiert ✓";}catch{status.textContent="Bitte markiere den Text und kopiere ihn manuell.";} });
+const feedbackSendButton = document.createElement("button");
+feedbackSendButton.id = "btn-send-feedback"; feedbackSendButton.type = "button"; feedbackSendButton.className = "btn btn-primary"; feedbackSendButton.textContent = "Feedback senden";
+document.getElementById("btn-copy-feedback").before(feedbackSendButton);
+feedbackSendButton.addEventListener("click", () => { const status=document.getElementById("feedback-status");try{window.location.href=Feedback.buildMailto(document.getElementById("feedback-text").value,publicFeedbackEmail,"0.6.2");status.textContent="Mailprogramm wird geöffnet …";}catch(error){status.textContent=error.message;} });
 document.getElementById("btn-gallery").addEventListener("click", () => openFileDialog(galleryInput));
 document.getElementById("nav-identify").addEventListener("click", showHome);
 document.getElementById("nav-catchbook").addEventListener("click", showCatchbook);
@@ -768,7 +774,7 @@ async function refreshLocalBackupStatus() {
 document.getElementById("btn-backup-export").addEventListener("click", async () => {
   try {
     const [catches, waters] = await Promise.all([catchStore.list(), waterStore.list()]);
-    const backup = await CatchBackup.createBackup(catches, waters, "0.6.1");
+    const backup = await CatchBackup.createBackup(catches, waters, "0.6.2");
     await localBackupStore.save(backup);
     const blob = new Blob([JSON.stringify(backup)], { type: "application/json" }); const url = URL.createObjectURL(blob); const link = document.createElement("a");
     link.href = url; link.download = `fish-identifier-backup-${new Date().toISOString().slice(0, 10)}.json`; link.click(); URL.revokeObjectURL(url);

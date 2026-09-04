@@ -1,4 +1,4 @@
-const CACHE_NAME = "fish-identifier-shell-v11";
+const CACHE_NAME = "fish-identifier-shell-v12";
 const APP_SHELL = [
   "/",
   "/index.html",
@@ -8,6 +8,7 @@ const APP_SHELL = [
   "/catch-statistics.js",
   "/catch-backup.js",
   "/local-backup-store.js",
+  "/feedback.js",
   "/water-store.js",
   "/manifest.webmanifest",
   "/icons/favicon.svg",

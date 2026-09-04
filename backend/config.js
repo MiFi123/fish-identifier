@@ -17,6 +17,11 @@ function booleanValue(value, fallback = false) {
   if (value === undefined || value === "") return fallback;
   return String(value).trim().toLowerCase() === "true";
 }
+function trustProxyValue(value) {
+  if (value === undefined || value === "" || String(value).toLowerCase() === "false") return false;
+  if (String(value).toLowerCase() === "true") return 1;
+  return positiveInteger(value, undefined, "TRUST_PROXY");
+}
 
 const nodeEnv = (process.env.NODE_ENV || "development").trim().toLowerCase();
 const appEnv = (process.env.APP_ENV || (nodeEnv === "production" ? "production" : "development")).trim().toLowerCase();
@@ -27,7 +32,8 @@ module.exports = {
   nodeEnv,
   appEnv,
   isProductionLike: nodeEnv === "production" || appEnv === "beta" || appEnv === "production",
-  trustProxy: booleanValue(process.env.TRUST_PROXY),
+  trustProxy: trustProxyValue(process.env.TRUST_PROXY),
+  publicFeedbackEmail: String(process.env.PUBLIC_FEEDBACK_EMAIL || "").trim(),
   port: positiveInteger(process.env.PORT, 3000, "PORT"),
   host: (process.env.HOST || "0.0.0.0").trim(),
   maxUploadSizeBytes: positiveInteger(

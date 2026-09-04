@@ -23,7 +23,7 @@
       </div>
 
       <div class="content">
-        <p class="beta-badge">Private Beta · 0.6.1</p><h1>Fish Identifier</h1>
+        <p class="beta-badge">Private Beta · 0.6.2</p><h1>Fish Identifier</h1>
         <p class="subtitle">Fisch fotografieren oder Bild auswählen</p>
         <div id="error-banner" class="message-banner error-banner hidden" role="alert" aria-live="assertive"></div>
 
@@ -224,7 +224,7 @@
 
     <main id="water-detail-screen" class="screen hidden" tabindex="-1" aria-hidden="true"><article class="catch-detail"><p class="eyebrow">Gespeichertes Gewässer</p><h1 id="water-detail-title"></h1><dl id="water-detail-data" class="catch-detail-data"></dl><section class="statistics-section"><h2>Gewässerstatistik</h2><dl id="water-detail-stats" class="catch-detail-data"></dl></section><section><h2>Fänge an diesem Gewässer</h2><p id="water-catches-empty" class="hidden">Noch keine Fänge an diesem Gewässer.</p><ul id="water-catches-list" class="catch-list"></ul></section><div class="actions"><button id="btn-edit-water" class="btn btn-secondary" type="button">Gewässer bearbeiten</button><button id="btn-water-detail-back" class="btn btn-text" type="button">Zurück zu meinen Gewässern</button></div></article></main>
 
-    <main id="info-screen" class="screen hidden" tabindex="-1" aria-hidden="true"><div class="info-content"><p class="eyebrow">Private Beta</p><h1>Über Fish Identifier</h1><section class="info-card"><h2>Version 0.6.1</h2><p>Diese Version befindet sich im Testbetrieb. KI-Bestimmungen können Fehler enthalten und erfolgen ohne Gewähr.</p><p>Fangbuch-, Gewässer- und Standortdaten werden lokal auf diesem Gerät gespeichert. Sichere Backups bitte eigenverantwortlich.</p></section><section class="info-card"><h2>Datenschutz</h2><p>Fotos werden zur Bestimmung an Fishial gesendet. Bei niedriger Bestimmungssicherheit kann Gemini als zweite Einschätzung verwendet werden. Fangbuch und GPS-Daten bleiben lokal; es gibt keine Benutzerkonten und keine Cloud-Synchronisierung.</p><p class="placeholder-note">Dieser Bereich wird vor dem öffentlichen Release mit den finalen rechtlichen Angaben ergänzt.</p></section><section class="info-card"><h2>Impressum</h2><p class="placeholder-note">Dieser Bereich wird vor dem öffentlichen Release mit den finalen rechtlichen Angaben ergänzt. Es werden bewusst keine erfundenen Anbieter- oder Adressdaten angezeigt.</p></section><section class="info-card"><h2>Feedback</h2><p>Du kannst eine kurze Rückmeldung verfassen und anschließend selbst kopieren.</p><textarea id="feedback-text" rows="4" maxlength="1000" placeholder="Was hat gut funktioniert? Wo gab es ein Problem?"></textarea><button id="btn-copy-feedback" class="btn btn-secondary" type="button">Feedback kopieren</button><p id="feedback-status" role="status"></p></section><button id="btn-info-back" class="btn btn-text" type="button">Zurück</button></div></main>
+    <main id="info-screen" class="screen hidden" tabindex="-1" aria-hidden="true"><div class="info-content"><p class="eyebrow">Private Beta</p><h1>Über Fish Identifier</h1><section class="info-card"><h2>Version 0.6.2</h2><p>Diese Version befindet sich im Testbetrieb. KI-Bestimmungen können Fehler enthalten und erfolgen ohne Gewähr.</p><p>Fangbuch-, Gewässer- und Standortdaten werden lokal auf diesem Gerät gespeichert. Sichere Backups bitte eigenverantwortlich.</p></section><section class="info-card"><h2>Datenschutz</h2><p>Fotos werden zur Bestimmung an Fishial gesendet. Bei niedriger Bestimmungssicherheit kann Gemini als zweite Einschätzung verwendet werden. Fangbuch und GPS-Daten bleiben lokal; es gibt keine Benutzerkonten und keine Cloud-Synchronisierung.</p><p class="placeholder-note">Dieser Bereich wird vor dem öffentlichen Release mit den finalen rechtlichen Angaben ergänzt.</p></section><section class="info-card"><h2>Impressum</h2><p class="placeholder-note">Dieser Bereich wird vor dem öffentlichen Release mit den finalen rechtlichen Angaben ergänzt. Es werden bewusst keine erfundenen Anbieter- oder Adressdaten angezeigt.</p></section><section class="info-card"><h2>Feedback</h2><p>Du kannst eine Rückmeldung verfassen und sie in deinem Mailprogramm vor dem Versand prüfen. Die Kopierfunktion bleibt als Alternative verfügbar.</p><textarea id="feedback-text" rows="4" maxlength="1000" placeholder="Was hat gut funktioniert? Wo gab es ein Problem?"></textarea><button id="btn-copy-feedback" class="btn btn-secondary" type="button">Feedback kopieren</button><p id="feedback-status" role="status"></p></section><button id="btn-info-back" class="btn btn-text" type="button">Zurück</button></div></main>
     <div id="update-banner" class="update-banner hidden" role="status"><span>Neue Version verfügbar.</span><button id="btn-reload-app" class="btn btn-primary" type="button">App neu laden</button></div>
 
     <nav class="app-nav" aria-label="Hauptnavigation">
@@ -250,6 +250,7 @@
     <script src="catch-backup.js"></script>
     <script src="local-backup-store.js"></script>
     <script src="water-store.js"></script>
+    <script src="feedback.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

@@ -1,4 +1,4 @@
-# Fish Identifier MVP 0.6.1 – Beta Deployment Readiness
+# Fish Identifier MVP 0.6.2 – Beta Polish
 
 Progressive Web App zur KI-gestützten Fischbestimmung mit lokalem Fangbuch, Gewässern, GPS-Daten und Backup. Fishial ist der primäre Dienst; bei niedriger Sicherheit kann die konfigurierte zweite KI eine zusätzliche Einschätzung liefern.
 
@@ -77,7 +77,7 @@ Frontend und API werden von derselben Domain ausgeliefert. Daher ist kein global
 ### Deployment Acceptance Checklist
 
 - Deployment startet ohne Konfigurationsfehler; Logs enthalten keine Schlüssel oder Nutzerdaten.
-- `/api/health` antwortet mit HTTP 200 und Version 0.6.1.
+- `/api/health` antwortet mit HTTP 200 und Version 0.6.2.
 - `/api/dev/stats` und `/api/dev/gemini-benchmark` antworten in Beta/Produktion mit 404.
 - HTTPS, Manifest, Service Worker, Installation und Updatehinweis funktionieren.
 - Fishial-Fall ab 80 % und Fishial-Fall unter 80 % mit Gemini prüfen.
@@ -87,3 +87,30 @@ Frontend und API werden von derselben Domain ausgeliefert. Daher ist kein global
 - Gewässer, GPS sowie lokales und externes Backup prüfen.
 
 Es gibt weiterhin keine Server-Datenbank und keine Cloud-Synchronisierung. Browserdaten sind an Gerät, Browserprofil und Domain gebunden; ein Domainwechsel übernimmt sie nicht automatisch.
+
+## Private Beta – Feedback
+
+`PUBLIC_FEEDBACK_EMAIL` enthält die bewusst öffentliche Empfängeradresse. „Feedback senden“ öffnet das lokale Mailprogramm mit dem eingegebenen Text und der App-Version. Es wird nichts automatisch versendet; der Nutzer sieht und bestätigt die Nachricht selbst. Fotos, GPS, Fänge und KI-Historie werden nicht übernommen. „Feedback kopieren“ bleibt als Fallback verfügbar.
+
+## Private Beta – Network Check
+
+Der Diagnose-Endpunkt ist ausschließlich bei `APP_ENV=beta` verfügbar und speichert oder zeigt keine echte IP-Adresse an.
+
+1. Auf Gerät A `/api/beta/network-check` öffnen und `clientIpHash` notieren.
+2. Den Endpunkt auf Gerät B über ein anderes Netzwerk öffnen, beispielsweise Mobilfunk statt WLAN.
+3. Die Hashes vergleichen.
+
+Unterschiedliche erkannte Client-IPs müssen unterschiedliche Hashes ergeben. Der Hash wird nur für die Antwort berechnet, auf 16 Zeichen gekürzt und nicht protokolliert oder gespeichert. Bei `APP_ENV=production` antwortet der Pfad mit 404.
+
+## Rate Limit Test
+
+Für einen temporären Test können beispielsweise folgende Werte in der Hosting-Umgebung gesetzt werden:
+
+```text
+RATE_LIMIT_WINDOW_MS=120000
+RATE_LIMIT_MAX_REQUESTS=3
+SECOND_OPINION_RATE_LIMIT_WINDOW_MS=120000
+SECOND_OPINION_RATE_LIMIT_MAX_REQUESTS=3
+```
+
+Nach dem Neustart wiederholt analysieren und HTTP 429 sowie `Retry-After` prüfen. Anschließend die normalen Werte von 10 Anfragen pro 600000 ms wiederherstellen. Analyse und zweite Meinung bleiben getrennt limitiert.

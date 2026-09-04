@@ -1,4 +1,5 @@
 const express = require("express");
+const crypto = require("crypto");
 const path = require("path");
 const multer = require("multer");
 const config = require("./backend/config");
@@ -13,7 +14,7 @@ const { getSpeciesCatalog, findSpecies } = require("./backend/species-catalog");
 
 const app = express();
 app.disable("x-powered-by");
-if (config.trustProxy) app.set("trust proxy", 1);
+if (config.trustProxy !== false) app.set("trust proxy", config.trustProxy);
 app.use((req, res, next) => {
   res.set({
     "X-Content-Type-Options": "nosniff",
@@ -51,7 +52,9 @@ const analysisStore = new AnalysisStore();
 app.locals.maxUploadSizeBytes = config.maxUploadSizeBytes;
 
 app.use(express.static(path.join(__dirname, "public")));
-app.get("/api/health", (req, res) => res.json({ status: "ok", version: "0.6.1" }));
+app.get("/api/health", (req, res) => res.json({ status: "ok", version: "0.6.2" }));
+app.get("/api/public-config", (req, res) => res.json({ feedbackEmail: config.publicFeedbackEmail }));
+if (config.appEnv === "beta") app.get("/api/beta/network-check", (req, res) => res.json({ status: "ok", proxyTrusted: config.trustProxy !== false, clientIpHash: crypto.createHash("sha256").update(req.ip).digest("hex").slice(0, 16), forwardedForPresent: Boolean(req.get("x-forwarded-for")) }));
 
 app.get("/api/species", (req, res) => res.json({ species: getSpeciesCatalog() }));
 app.get("/api/species/:scientificName", (req, res) => {
@@ -144,7 +147,7 @@ app.use((error, req, res, next) => {
 function startServer() {
   config.validateStartup();
   const server = app.listen(config.port, config.host, () => {
-    console.log("Fish Identifier 0.6.1");
+    console.log("Fish Identifier 0.6.2");
     console.log(`Environment: ${config.appEnv}`);
     console.log(`Port: ${config.port}`);
     console.log(`Second Opinion: ${config.secondOpinion.enabled ? "enabled" : "disabled"}`);
