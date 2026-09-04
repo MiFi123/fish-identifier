@@ -1,0 +1,12 @@
+const assert=require("node:assert/strict");const fs=require("node:fs"),path=require("node:path");const {normalizeCatch,normalizeLocation}=require("../public/catch-store.js");
+const valid={latitude:47.98,longitude:10.15,accuracy:12,capturedAt:"2026-09-03T12:00:00Z"};
+assert.deepEqual(normalizeLocation(valid),{...valid,capturedAt:"2026-09-03T12:00:00.000Z"});
+for(const location of [{...valid,latitude:91},{...valid,latitude:-91}])assert.throws(()=>normalizeLocation(location),/Breitengrad/);
+for(const location of [{...valid,longitude:181},{...valid,longitude:-181}])assert.throws(()=>normalizeLocation(location),/Längengrad/);
+assert.throws(()=>normalizeLocation({...valid,accuracy:-1}),/genauigkeit/i);
+assert.equal(normalizeCatch({speciesName:"Hecht",caughtDate:"2026-09-03"}).location,null);
+assert.equal(normalizeCatch({speciesName:"Hecht",caughtDate:"2026-09-03",location:null}).location,null);
+const html=fs.readFileSync(path.join(__dirname,"..","public","index.html"),"utf8"),app=fs.readFileSync(path.join(__dirname,"..","public","app.js"),"utf8");
+assert.match(html,/Aktuellen Standort verwenden/);assert.match(html,/Dein Standort wird nur lokal/);assert.match(html,/id="water-detail-screen"/);
+assert.match(app,/getCurrentPosition/);assert.doesNotMatch(app,/watchPosition/);assert.match(app,/permission|Standortzugriff/);assert.match(app,/maximumAge:0/);
+console.log("Phase-12B-Tests erfolgreich.");

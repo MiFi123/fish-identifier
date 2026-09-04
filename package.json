@@ -1,0 +1,17 @@
+{
+  "name": "fish-identifier",
+  "version": "0.6.1",
+  "private": true,
+  "description": "Fish Identifier MVP 0.6.1 – Beta Deployment Readiness",
+  "engines": { "node": ">=20 <25" },
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test/phase3.test.js && node test/gemini-benchmark.test.js && node test/analysis-store.test.js && node test/pwa.test.js && node test/catch-store.test.js && node test/catch-statistics.test.js && node test/species-catalog.test.js && node test/catch-backup.test.js && node test/water-store.test.js && node test/water-integration.test.js && node test/phase12b.test.js && node test/ux-polish.test.js && node test/private-beta.test.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "multer": "^2.0.2"
+  }
+}

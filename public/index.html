@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0F6E56" />
+    <meta name="application-name" content="Fish Identifier" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Fish Identifier" />
+    <title>Fish Identifier</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icons/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icons/icon-192.svg" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main id="home-screen" class="screen" tabindex="-1">
+      <div class="wave" aria-hidden="true">
+        <svg viewBox="0 0 400 80" preserveAspectRatio="none">
+          <path d="M0,40 C100,80 300,0 400,40 L400,0 L0,0 Z" fill="currentColor" />
+        </svg>
+      </div>
+
+      <div class="content">
+        <p class="beta-badge">Private Beta · 0.6.1</p><h1>Fish Identifier</h1>
+        <p class="subtitle">Fisch fotografieren oder Bild auswählen</p>
+        <div id="error-banner" class="message-banner error-banner hidden" role="alert" aria-live="assertive"></div>
+
+        <div class="actions">
+          <button id="btn-camera" class="btn btn-primary" type="button">
+            <span aria-hidden="true">📷</span> Kamera öffnen
+          </button>
+          <button id="btn-gallery" class="btn btn-secondary" type="button">
+            <span aria-hidden="true">🖼️</span> Bild auswählen
+          </button>
+          <button id="btn-install" class="btn btn-text hidden" type="button">App installieren</button>
+          <button id="btn-info" class="btn btn-text" type="button">Info &amp; Datenschutz</button>
+        </div>
+      </div>
+
+      <input id="camera-input" type="file" accept="image/*" capture="environment" hidden />
+      <input id="gallery-input" type="file" accept="image/*" hidden />
+    </main>
+
+    <main id="preview-screen" class="screen hidden" tabindex="-1" aria-hidden="true">
+      <div class="preview-image-wrap">
+        <img id="preview-image" alt="Vorschau des ausgewählten Fischfotos" />
+      </div>
+
+      <div class="content">
+        <div id="info-banner" class="message-banner info-banner hidden" role="status" aria-live="polite"></div>
+        <div class="actions">
+          <button id="btn-analyze" class="btn btn-primary" type="button">Fisch bestimmen</button>
+          <button id="btn-retake" class="btn btn-text" type="button">Anderes Bild wählen</button>
+        </div>
+      </div>
+    </main>
+
+    <main id="result-screen" class="screen hidden" tabindex="-1" aria-hidden="true">
+      <div class="result-content">
+        <section class="primary-result-card" aria-labelledby="result-title">
+          <p class="eyebrow">KI-Bestimmung</p>
+          <h1 id="result-title">Keine Art bestimmt</h1>
+          <p id="result-scientific-name" class="scientific-name hidden"></p>
+          <p id="result-original-name" class="original-name hidden"></p>
+          <p class="result-intro">Die KI-Bestimmung dient als Einschätzung und kann Fehler enthalten.</p>
+          <div id="result-message" class="message-banner info-banner" role="status" aria-live="polite"></div>
+          <p id="result-guidance" class="result-guidance hidden"></p>
+        </section>
+
+        <section class="result-card confidence-card" aria-label="Sicherheit der Bestimmung">
+          <div class="confidence-heading">
+            <h2>Sicherheit</h2>
+            <p id="result-confidence" class="confidence hidden"></p>
+          </div>
+          <div class="confidence-meter" role="progressbar" aria-label="Sicherheit der Bestimmung" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <span id="confidence-bar"></span>
+          </div>
+          <p id="result-confidence-level" class="confidence-level hidden"></p>
+        </section>
+
+        <p id="second-opinion-notice" class="second-opinion-notice hidden" role="status" aria-live="polite">Zweite KI prüft die Bestimmung …</p>
+        <section id="second-opinion-section" class="second-opinion-section hidden" aria-labelledby="second-opinion-title">
+          <h2 id="second-opinion-title">Zweite KI-Analyse</h2>
+          <p id="second-opinion-message"></p>
+          <p id="second-opinion-primary-species" class="second-opinion-primary-species hidden"></p>
+          <p id="second-opinion-species" class="second-opinion-species hidden"></p>
+          <p id="second-opinion-reasoning" class="second-opinion-reasoning hidden"></p>
+        </section>
+        <p id="second-opinion-unavailable" class="second-opinion-unavailable hidden">Die zweite Analyse war derzeit nicht verfügbar.</p>
+
+        <details id="alternatives-section" class="alternatives hidden">
+          <summary>Weitere mögliche Arten</summary>
+          <ul id="alternatives-list"></ul>
+        </details>
+
+        <section id="species-info-section" class="species-info hidden" aria-labelledby="species-info-title">
+          <h2 id="species-info-title">Fisch-Steckbrief</h2>
+          <dl>
+            <div><dt>Kurzbeschreibung</dt><dd id="species-description"></dd></div>
+            <div><dt>Lebensraum</dt><dd id="species-habitat"></dd></div>
+            <div><dt>Nahrung</dt><dd id="species-diet"></dd></div>
+            <div><dt>Typische Größe</dt><dd id="species-typical-size"></dd></div>
+            <div><dt>Maximalgröße</dt><dd id="species-maximum-size"></dd></div>
+          </dl>
+          <h3>Erkennungsmerkmale</h3>
+          <ul id="species-identification-features"></ul>
+        </section>
+        <p id="species-info-unavailable" class="species-info-unavailable hidden">Für diese Art sind derzeit noch keine weiteren Informationen hinterlegt.</p>
+
+        <p class="ai-notice">KI-Bestimmung – Angaben ohne Gewähr.</p>
+        <div class="actions">
+          <button id="btn-save-catch" class="btn btn-secondary hidden" type="button">Fang speichern</button>
+          <button id="btn-new-fish" class="btn btn-primary" type="button">Neuen Fisch analysieren</button>
+        </div>
+      </div>
+    </main>
+
+    <main id="catchbook-screen" class="screen hidden" tabindex="-1" aria-hidden="true">
+      <div class="catchbook-content">
+        <p class="eyebrow">Persönliches Fangbuch</p>
+        <h1>Mein Fangbuch</h1>
+        <p class="local-data-note">Deine Fangbuchdaten werden derzeit nur auf diesem Gerät gespeichert.</p>
+        <p class="data-loss-note">Beim Löschen der App-Daten können gespeicherte Fänge verloren gehen.</p>
+        <section class="backup-panel"><h2>Datensicherung</h2><p>Deine Fang-, Gewässer- und Standortdaten bleiben lokal.</p><button id="btn-backup-export" class="btn btn-secondary" type="button">Jetzt sichern</button><p id="local-backup-date">Lokale Sicherung: noch nicht vorhanden</p><button id="btn-local-backup-restore" class="btn btn-text" type="button" disabled>Letztes Backup wiederherstellen</button><button id="btn-backup-import" class="btn btn-text" type="button">Backup-Datei importieren</button><p>Die lokale Sicherung ermöglicht eine schnelle Wiederherstellung auf diesem Gerät. Für einen Gerätewechsel oder Datenverlust solltest du zusätzlich die Backup-Datei sicher aufbewahren.</p><input id="backup-input" type="file" accept="application/json,.json" hidden /><p id="backup-status" role="status" aria-live="polite"></p></section>
+        <section id="catch-summary" class="catch-summary hidden" aria-label="Fangbuch-Übersicht">
+          <p id="catch-summary-values"></p>
+          <button id="btn-show-statistics" class="btn btn-text" type="button">Statistik ansehen</button>
+        </section>
+        <section class="waters-panel" aria-labelledby="waters-panel-title">
+          <div><h2 id="waters-panel-title">Meine Gewässer</h2><p>Verwalte die Orte, die du deinen Fängen zuordnest.</p></div>
+          <button id="btn-manage-waters" class="btn btn-text" type="button">Gewässer verwalten</button>
+        </section>
+        <div id="catchbook-error" class="message-banner error-banner hidden" role="alert"></div>
+        <section id="catchbook-empty" class="empty-catchbook hidden">
+          <h2>Dein Fangbuch ist noch leer.</h2>
+          <p>Bestimme deinen ersten Fisch und speichere ihn anschließend als Fang.</p>
+          <button id="btn-empty-identify" class="btn btn-primary" type="button">Fisch bestimmen</button>
+        </section>
+        <ul id="catch-list" class="catch-list" aria-label="Gespeicherte Fänge"></ul>
+        <div id="catchbook-success" class="catchbook-success hidden" role="status" aria-live="polite">
+          <p>Fang gespeichert ✓</p>
+        </div>
+      </div>
+    </main>
+
+    <main id="statistics-screen" class="screen hidden" tabindex="-1" aria-hidden="true">
+      <div class="statistics-content">
+        <p class="eyebrow">Persönliches Fangbuch</p><h1>Statistik</h1>
+        <section id="statistics-overview" class="statistics-section"></section>
+        <section id="statistics-records" class="statistics-section"></section>
+        <section id="statistics-species" class="statistics-section"></section>
+        <section id="statistics-activity" class="statistics-section"></section>
+        <section id="statistics-waters" class="statistics-section"></section>
+        <button id="btn-statistics-back" class="btn btn-text" type="button">Zurück zum Fangbuch</button>
+      </div>
+    </main>
+
+    <main id="species-screen" class="screen hidden" tabindex="-1" aria-hidden="true">
+      <div class="species-content">
+        <p class="eyebrow">Artenlexikon</p><h1>Fischarten</h1>
+        <p class="local-data-note">Entdecke heimische und häufig vorkommende Fischarten.</p>
+        <label class="species-search-label">Fischart suchen<input id="species-search" type="search" placeholder="Hecht, Esox, Forelle …" autocomplete="off" /></label>
+        <p id="species-empty" class="species-empty hidden">Keine passende Fischart gefunden. Versuche einen anderen Namen oder den wissenschaftlichen Namen.</p>
+        <div id="species-list" class="species-list"></div>
+        <article id="species-detail" class="species-detail hidden"></article>
+      </div>
+    </main>
+
+    <main id="catch-form-screen" class="screen hidden" tabindex="-1" aria-hidden="true">
+      <form id="catch-form" class="catch-form" novalidate>
+        <p class="eyebrow" id="catch-form-eyebrow">Fang speichern</p>
+        <h1 id="catch-form-title">Fang speichern</h1>
+        <img id="catch-form-image" class="catch-form-image hidden" alt="Fangfoto für diesen Eintrag" />
+        <p id="catch-pending-note" class="second-opinion-notice hidden">Die zweite KI prüft die Art noch. Du kannst die primäre Bestimmung jetzt speichern.</p>
+        <fieldset id="catch-species-choice" class="species-choice hidden">
+          <legend>Welche Art möchtest du speichern?</legend>
+          <div id="catch-species-options"></div>
+        </fieldset>
+        <label>Fischart <span aria-hidden="true">*</span><input id="catch-species-name" name="speciesName" maxlength="120" required /></label>
+        <label>Wissenschaftlicher Name<input id="catch-scientific-name" name="scientificName" maxlength="160" /></label>
+        <div class="form-grid">
+          <label>Datum <span aria-hidden="true">*</span><input id="catch-date" name="caughtDate" type="date" required /></label>
+          <label>Uhrzeit<input id="catch-time" name="caughtTime" type="time" /></label>
+        </div>
+        <div class="form-grid">
+          <label>Länge in cm<input id="catch-length" name="lengthCm" type="number" min="0.1" step="0.1" inputmode="decimal" /></label>
+          <label>Gewicht<div class="weight-input"><input id="catch-weight" name="weightInput" type="text" inputmode="decimal" /><select id="catch-weight-unit" name="weightUnit" aria-label="Gewichtseinheit"><option value="kg" selected>kg</option><option value="g">g</option></select></div></label>
+        </div>
+        <label>Gewässer<select id="catch-water" name="waterId"><option value="">Kein Gewässer</option></select></label>
+        <section class="location-panel" aria-labelledby="location-title"><h2 id="location-title">Standort</h2><p>Dein Standort wird nur lokal mit diesem Fang gespeichert.</p><p id="location-status" role="status" aria-live="polite"></p><div class="inline-actions"><button id="btn-use-location" class="btn btn-secondary" type="button">Aktuellen Standort verwenden</button><button id="btn-remove-location" class="btn btn-text hidden" type="button">Standort entfernen</button></div></section>
+        <label>Notiz<textarea id="catch-note" name="note" maxlength="1000" rows="4"></textarea></label>
+        <p class="form-help">Du kannst die erkannte Fischart vor dem Speichern korrigieren.</p>
+        <p id="catch-form-error" class="message-banner error-banner hidden" role="alert"></p>
+        <div class="actions">
+          <button id="btn-catch-submit" class="btn btn-primary" type="submit">Fang lokal speichern</button>
+          <button id="btn-catch-cancel" class="btn btn-text" type="button">Abbrechen</button>
+        </div>
+      </form>
+    </main>
+
+    <main id="catch-detail-screen" class="screen hidden" tabindex="-1" aria-hidden="true">
+      <article class="catch-detail">
+        <img id="catch-detail-image" class="catch-detail-image hidden" alt="Gespeichertes Fangfoto" />
+        <p class="eyebrow">Gespeicherter Fang</p>
+        <h1 id="catch-detail-title"></h1>
+        <p id="catch-detail-scientific" class="scientific-name hidden"></p>
+        <dl id="catch-detail-data" class="catch-detail-data"></dl>
+        <section id="catch-identification" class="catch-identification hidden" aria-labelledby="catch-identification-title">
+          <h2 id="catch-identification-title">KI-Bestimmung</h2>
+          <p id="catch-identification-data"></p>
+        </section>
+        <div class="actions">
+          <button id="btn-edit-catch" class="btn btn-secondary" type="button">Fang bearbeiten</button>
+          <button id="btn-delete-catch" class="btn btn-text danger-button" type="button">Fang löschen</button>
+          <button id="btn-back-catchbook" class="btn btn-text" type="button">Zurück zum Fangbuch</button>
+        </div>
+      </article>
+    </main>
+
+    <main id="waters-screen" class="screen hidden" tabindex="-1" aria-hidden="true"><div class="waters-content"><p class="eyebrow">Persönliches Fangbuch</p><h1>Meine Gewässer</h1><button id="btn-add-water" class="btn btn-primary" type="button">Gewässer hinzufügen</button><div id="waters-error" class="message-banner error-banner hidden" role="alert"></div><p id="waters-empty" class="empty-water hidden">Noch kein Gewässer angelegt.</p><ul id="waters-list" class="waters-list" aria-label="Gespeicherte Gewässer"></ul><button id="btn-waters-back" class="btn btn-text" type="button">Zurück zum Fangbuch</button></div></main>
+    <main id="water-form-screen" class="screen hidden" tabindex="-1" aria-hidden="true"><form id="water-form" class="catch-form" novalidate><p class="eyebrow">Gewässer verwalten</p><h1 id="water-form-title">Gewässer hinzufügen</h1><label>Gewässername <span aria-hidden="true">*</span><input name="name" maxlength="120" required /></label><label>Gewässertyp<select name="type" required></select></label><label>Region<input name="region" maxlength="120" /></label><label>Notiz<textarea name="note" maxlength="1000" rows="4"></textarea></label><p id="water-form-error" class="message-banner error-banner hidden" role="alert"></p><div class="actions"><button class="btn btn-primary" type="submit">Gewässer speichern</button><button id="btn-water-cancel" class="btn btn-text" type="button">Abbrechen</button></div></form></main>
+
+    <main id="water-detail-screen" class="screen hidden" tabindex="-1" aria-hidden="true"><article class="catch-detail"><p class="eyebrow">Gespeichertes Gewässer</p><h1 id="water-detail-title"></h1><dl id="water-detail-data" class="catch-detail-data"></dl><section class="statistics-section"><h2>Gewässerstatistik</h2><dl id="water-detail-stats" class="catch-detail-data"></dl></section><section><h2>Fänge an diesem Gewässer</h2><p id="water-catches-empty" class="hidden">Noch keine Fänge an diesem Gewässer.</p><ul id="water-catches-list" class="catch-list"></ul></section><div class="actions"><button id="btn-edit-water" class="btn btn-secondary" type="button">Gewässer bearbeiten</button><button id="btn-water-detail-back" class="btn btn-text" type="button">Zurück zu meinen Gewässern</button></div></article></main>
+
+    <main id="info-screen" class="screen hidden" tabindex="-1" aria-hidden="true"><div class="info-content"><p class="eyebrow">Private Beta</p><h1>Über Fish Identifier</h1><section class="info-card"><h2>Version 0.6.1</h2><p>Diese Version befindet sich im Testbetrieb. KI-Bestimmungen können Fehler enthalten und erfolgen ohne Gewähr.</p><p>Fangbuch-, Gewässer- und Standortdaten werden lokal auf diesem Gerät gespeichert. Sichere Backups bitte eigenverantwortlich.</p></section><section class="info-card"><h2>Datenschutz</h2><p>Fotos werden zur Bestimmung an Fishial gesendet. Bei niedriger Bestimmungssicherheit kann Gemini als zweite Einschätzung verwendet werden. Fangbuch und GPS-Daten bleiben lokal; es gibt keine Benutzerkonten und keine Cloud-Synchronisierung.</p><p class="placeholder-note">Dieser Bereich wird vor dem öffentlichen Release mit den finalen rechtlichen Angaben ergänzt.</p></section><section class="info-card"><h2>Impressum</h2><p class="placeholder-note">Dieser Bereich wird vor dem öffentlichen Release mit den finalen rechtlichen Angaben ergänzt. Es werden bewusst keine erfundenen Anbieter- oder Adressdaten angezeigt.</p></section><section class="info-card"><h2>Feedback</h2><p>Du kannst eine kurze Rückmeldung verfassen und anschließend selbst kopieren.</p><textarea id="feedback-text" rows="4" maxlength="1000" placeholder="Was hat gut funktioniert? Wo gab es ein Problem?"></textarea><button id="btn-copy-feedback" class="btn btn-secondary" type="button">Feedback kopieren</button><p id="feedback-status" role="status"></p></section><button id="btn-info-back" class="btn btn-text" type="button">Zurück</button></div></main>
+    <div id="update-banner" class="update-banner hidden" role="status"><span>Neue Version verfügbar.</span><button id="btn-reload-app" class="btn btn-primary" type="button">App neu laden</button></div>
+
+    <nav class="app-nav" aria-label="Hauptnavigation">
+      <button id="nav-identify" class="nav-button is-active" type="button"><span aria-hidden="true">⌕</span>Bestimmen</button>
+      <button id="nav-catchbook" class="nav-button" type="button"><span aria-hidden="true">▤</span>Fangbuch</button>
+      <button id="nav-species" class="nav-button" type="button"><span aria-hidden="true">🐟</span>Arten</button>
+    </nav>
+
+    <dialog id="delete-catch-dialog" class="delete-dialog" aria-labelledby="delete-catch-title">
+      <h2 id="delete-catch-title">Diesen Fang wirklich löschen?</h2>
+      <p>Der lokal gespeicherte Fang wird endgültig entfernt.</p>
+      <div class="inline-actions">
+        <button id="btn-delete-cancel" class="btn btn-secondary" type="button">Abbrechen</button>
+        <button id="btn-delete-confirm" class="btn btn-primary danger-primary" type="button">Löschen</button>
+      </div>
+    </dialog>
+    <dialog id="import-dialog" class="delete-dialog"><h2>Backup gefunden</h2><p id="import-summary"></p><div class="actions"><button id="btn-import-merge" class="btn btn-secondary" type="button">Mit Fangbuch zusammenführen</button><button id="btn-import-replace" class="btn btn-primary danger-primary" type="button">Bestehendes Fangbuch ersetzen</button><button id="btn-import-cancel" class="btn btn-text" type="button">Abbrechen</button></div></dialog>
+
+    <dialog id="delete-water-dialog" class="delete-dialog" aria-labelledby="delete-water-title"><h2 id="delete-water-title">Gewässer löschen?</h2><p>Zugeordnete Fänge bleiben erhalten und zeigen weiterhin den beim Speichern festgehaltenen Gewässernamen.</p><div class="inline-actions"><button id="btn-delete-water-cancel" class="btn btn-secondary" type="button">Abbrechen</button><button id="btn-delete-water-confirm" class="btn btn-primary danger-primary" type="button">Löschen</button></div></dialog>
+
+    <script src="catch-store.js"></script>
+    <script src="catch-statistics.js"></script>
+    <script src="catch-backup.js"></script>
+    <script src="local-backup-store.js"></script>
+    <script src="water-store.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

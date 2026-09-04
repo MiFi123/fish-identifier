@@ -1,0 +1,11 @@
+const assert = require("node:assert/strict");
+const { getSpeciesCatalog, findSpecies } = require("../backend/species-catalog");
+const catalog = getSpeciesCatalog();
+assert.ok(catalog.length >= 35);
+assert.equal([...catalog].sort((a, b) => a.germanName.localeCompare(b.germanName, "de")).map((item) => item.germanName).join(), catalog.map((item) => item.germanName).join());
+assert.equal(findSpecies("Esox lucius").germanName, "Hecht");
+assert.equal(findSpecies("esox   LUCIUS").germanName, "Hecht");
+assert.equal(findSpecies("Unknown fish"), null);
+assert.ok(findSpecies("Esox lucius").identificationFeatures.length);
+assert.equal(findSpecies("Leuciscus idus").description, undefined);
+console.log("Artenlexikon-Tests erfolgreich.");

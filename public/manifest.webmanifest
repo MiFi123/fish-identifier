@@ -1,0 +1,28 @@
+{
+  "name": "Fish Identifier",
+  "short_name": "Fish Identifier",
+  "description": "Fish Identifier Private Beta 0.6.1 – Fische per Foto mit KI bestimmen.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#0F6E56",
+  "background_color": "#F3F6F4",
+  "icons": [
+    {
+      "src": "icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "icons/icon-maskable.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

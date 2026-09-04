@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Fish Identifier">
+  <rect width="64" height="64" rx="16" fill="#0F6E56"/>
+  <path fill="#fff" d="M14 32c8-12 22-15 35-8l7-7v30l-7-7c-13 7-27 4-35-8Zm10 0a5 5 0 1 0 10 0 5 5 0 0 0-10 0Zm2 0a3 3 0 1 1 6 0 3 3 0 0 1-6 0Z"/>
+  <circle cx="29" cy="30" r="1.5" fill="#0F6E56"/>
+</svg>
