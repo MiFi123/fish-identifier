@@ -1,16 +1,23 @@
 const crypto = require("crypto");
+const { AppError } = require('./errors');
 
 class AnalysisStore {
-  constructor({ ttlMs = 5 * 60 * 1000, now = () => Date.now() } = {}) {
+  constructor({ ttlMs = 5 * 60 * 1000, now = () => Date.now(), maxEntries = 32, maxBytes = 64 * 1024 * 1024 } = {}) {
     this.ttlMs = ttlMs;
     this.now = now;
     this.entries = new Map();
+    this.maxEntries = maxEntries;
+    this.maxBytes = maxBytes;
     this.cleanupTimer = setInterval(() => this.cleanup(), Math.min(ttlMs, 60_000));
     this.cleanupTimer.unref();
   }
 
   create({ buffer, mimeType, result }) {
     this.cleanup();
+    const retainedBytes = [...this.entries.values()].reduce((sum, entry) => sum + (entry.buffer?.length || 0), 0);
+    if (this.entries.size >= this.maxEntries || retainedBytes + buffer.length > this.maxBytes) {
+      throw new AppError('Die zweite Analyse ist gerade ausgelastet. Bitte später erneut versuchen.', { status: 503, code: 'ANALYSIS_CAPACITY' });
+    }
     const id = crypto.randomUUID();
     const entry = { id, buffer, mimeType, result, createdAt: this.now(), status: "pending", promise: null };
     this.entries.set(id, entry);
@@ -20,7 +27,7 @@ class AnalysisStore {
   get(id) {
     const entry = this.entries.get(id);
     if (!entry) return null;
-    if (this.now() - entry.createdAt > this.ttlMs) {
+    if (entry.status !== 'processing' && this.now() - entry.createdAt > this.ttlMs) {
       this.entries.delete(id);
       return null;
     }
@@ -38,6 +45,10 @@ class AnalysisStore {
         entry.result = await task(entry);
         entry.status = entry.result.secondOpinionStatus === "completed" ? "completed" : "failed";
         return entry.result;
+      } catch (error) {
+        entry.status = 'failed';
+        entry.result = { ...entry.result, secondOpinionStatus: 'failed', secondOpinionUnavailable: true };
+        throw error;
       } finally {
         entry.buffer = null;
         entry.mimeType = null;
@@ -47,7 +58,7 @@ class AnalysisStore {
   }
 
   cleanup() {
-    for (const [id, entry] of this.entries) if (this.now() - entry.createdAt > this.ttlMs) this.entries.delete(id);
+    for (const [id, entry] of this.entries) if (entry.status !== 'processing' && this.now() - entry.createdAt > this.ttlMs) this.entries.delete(id);
   }
 
   size() { this.cleanup(); return this.entries.size; }

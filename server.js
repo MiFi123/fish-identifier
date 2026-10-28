@@ -11,6 +11,7 @@ const { createSecondOpinionDiagnostics } = require("./backend/second-opinion-dia
 const { BENCHMARK_MODELS, runGeminiBenchmark } = require("./backend/gemini-benchmark");
 const { AnalysisStore } = require("./backend/analysis-store");
 const { getSpeciesCatalog, findSpecies } = require("./backend/species-catalog");
+const { protectApi, validateUploadedImage, createWorkLimiter } = require('./backend/request-security');
 
 const app = express();
 app.disable("x-powered-by");
@@ -34,23 +35,28 @@ const allowedImageTypes = new Set([
   "image/heif",
 ]);
 
-const upload = multer({
+const uploadOptions = {
   storage: multer.memoryStorage(),
-  limits: { fileSize: config.maxUploadSizeBytes, files: 1 },
+  limits: { fileSize: config.maxUploadSizeBytes, files: 1, fields: 0, parts: 1, headerPairs: 32 },
   fileFilter: (req, file, callback) => {
     if (!allowedImageTypes.has(file.mimetype)) {
       return callback(new AppError("Nicht unterstützter Bildtyp.", { status: 415, code: "UNSUPPORTED_IMAGE_TYPE" }));
     }
     return callback(null, true);
   },
-});
+};
+const upload = multer(uploadOptions);
+// The local benchmark accepts one small repetitions field in addition to the image.
+const benchmarkUpload = multer({ ...uploadOptions, limits: { ...uploadOptions.limits, fields: 1, parts: 2, fieldSize: 16 } });
 
 const secondOpinionDiagnostics = createSecondOpinionDiagnostics();
 const primaryAnalysisService = createPrimaryAnalysisService(createAnalysisProvider(config));
 const secondOpinionProvider = createSecondOpinionProvider(config, { diagnostics: secondOpinionDiagnostics });
 const analysisStore = new AnalysisStore();
+const limitAnalysisWork = createWorkLimiter();
 app.locals.maxUploadSizeBytes = config.maxUploadSizeBytes;
 
+app.use('/api', protectApi);
 app.use(express.static(path.join(__dirname, "public")));
 app.get("/api/health", (req, res) => res.json({ status: "ok", version: "0.6.2" }));
 app.get("/api/public-config", (req, res) => res.json({ feedbackEmail: config.publicFeedbackEmail }));
@@ -65,9 +71,11 @@ app.get("/api/species/:scientificName", (req, res) => {
 
 if (!config.isProductionLike) {
   app.get("/api/dev/stats", (req, res) => res.json({ ...secondOpinionDiagnostics.snapshot(), activeAnalyses: analysisStore.size() }));
-  app.post("/api/dev/gemini-benchmark", upload.single("image"), async (req, res, next) => {
+  app.post("/api/dev/gemini-benchmark", limitAnalysisWork, benchmarkUpload.single("image"), validateUploadedImage, async (req, res, next) => {
+    req.analysisWork.start();
     try {
       if (!req.file) throw new AppError("Bitte wähle ein Bild für den Benchmark aus.", { status: 400, code: "IMAGE_REQUIRED" });
+      if (Object.keys(req.body || {}).some(key => key !== 'repetitions')) throw new AppError("Ungültige Benchmark-Felder.", { status: 400, code: "INVALID_UPLOAD" });
       if (!config.gemini.apiKey) throw new AppError("Gemini ist nicht konfiguriert.", { status: 503, code: "GEMINI_NOT_CONFIGURED" });
       const results = await runGeminiBenchmark({
         apiKey: config.gemini.apiKey,
@@ -77,14 +85,18 @@ if (!config.isProductionLike) {
       });
       return res.json({ models: BENCHMARK_MODELS, results });
     } catch (error) { return next(error); }
+    finally { req.analysisWork.release(); }
   });
 }
 
 app.post(
   "/api/analyze",
   createRateLimiter(config.rateLimit),
+  limitAnalysisWork,
   upload.single("image"),
+  validateUploadedImage,
   async (req, res, next) => {
+    req.analysisWork.start();
     try {
       if (!req.file) {
         throw new AppError("Bitte wähle ein Bild für die Analyse aus.", {
@@ -105,11 +117,12 @@ app.post(
       return res.status(200).json(result);
     } catch (error) {
       return next(error);
-    }
+    } finally { req.analysisWork.release(); }
   },
 );
 
-app.post("/api/analyze/:analysisId/second-opinion", createRateLimiter(config.secondOpinionRateLimit), async (req, res, next) => {
+app.post("/api/analyze/:analysisId/second-opinion", createRateLimiter(config.secondOpinionRateLimit), limitAnalysisWork, async (req, res, next) => {
+  req.analysisWork.start();
   try {
     if (!secondOpinionProvider) throw new AppError("Die zweite KI-Analyse ist nicht konfiguriert.", { status: 503, code: "SECOND_OPINION_NOT_CONFIGURED" });
     const result = await analysisStore.startSecondOpinion(req.params.analysisId, (entry) => runSecondOpinion(
@@ -120,6 +133,7 @@ app.post("/api/analyze/:analysisId/second-opinion", createRateLimiter(config.sec
     if (!result) throw new AppError("Diese Analyse ist nicht mehr verfügbar.", { status: 404, code: "ANALYSIS_NOT_FOUND" });
     return res.status(200).json(result);
   } catch (error) { return next(error); }
+  finally { req.analysisWork.release(); }
 });
 
 app.use((error, req, res, next) => {
@@ -129,8 +143,12 @@ app.use((error, req, res, next) => {
       error: { code: "IMAGE_TOO_LARGE", message: "Das Bild ist zu groß. Bitte wähle ein Bild mit höchstens 10 MB aus." },
     });
   }
+  if (error instanceof multer.MulterError) {
+    return res.status(400).json({ success: false, error: { code: 'INVALID_UPLOAD', message: 'Bitte genau eine Bilddatei ohne zusätzliche Felder hochladen.' } });
+  }
 
   if (error instanceof AppError) {
+    if (error.status === 503) res.set('Retry-After', '2');
     return res.status(error.status).json({
       success: false,
       error: { code: error.code, message: error.message },
@@ -153,6 +171,9 @@ function startServer() {
     console.log(`Second Opinion: ${config.secondOpinion.enabled ? "enabled" : "disabled"}`);
     console.log(`Dev routes: ${config.isProductionLike ? "disabled" : "enabled"}`);
   });
+  server.requestTimeout = 30_000;
+  server.headersTimeout = 15_000;
+  server.keepAliveTimeout = 5_000;
   const shutdown = (signal) => {
     console.log(`${signal}: Server wird beendet.`);
     server.close(() => process.exit(0));

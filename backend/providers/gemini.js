@@ -101,9 +101,10 @@ function createGeminiProvider({ apiKey, model, fetchImplementation = fetch, diag
       for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
         try {
           diagnostics?.attemptStarted(attempt + 1);
-          const response = await fetchImplementation(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+          const response = await fetchImplementation(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json", 'x-goog-api-key': apiKey },
+            redirect: 'error',
             body: JSON.stringify({
               contents: [{ parts: [
                 { text: buildPrompt(fishial) },

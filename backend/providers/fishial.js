@@ -47,6 +47,7 @@ function createFishialProvider({ clientId, clientSecret, baseUrl, fetchImplement
     let response;
     try {
       response = await fetchImplementation(`${baseUrl}/v2/auth`, {
+        redirect: 'error',
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ client_id: clientId, client_secret: clientSecret }),
@@ -74,6 +75,7 @@ function createFishialProvider({ clientId, clientSecret, baseUrl, fetchImplement
       let response;
       try {
         response = await fetchImplementation(`${baseUrl}/v2/recognize`, {
+          redirect: 'error',
           method: "POST",
           headers: {
             Authorization: `Bearer ${accessToken}`,

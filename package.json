@@ -7,7 +7,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "node test/phase3.test.js && node test/gemini-benchmark.test.js && node test/analysis-store.test.js && node test/pwa.test.js && node test/catch-store.test.js && node test/catch-statistics.test.js && node test/species-catalog.test.js && node test/catch-backup.test.js && node test/water-store.test.js && node test/water-integration.test.js && node test/phase12b.test.js && node test/ux-polish.test.js && node test/private-beta.test.js && node test/beta-polish.test.js"
+    "test:security": "node --test test/security.test.js",
+    "test": "node test/phase3.test.js && node test/gemini-benchmark.test.js && node test/analysis-store.test.js && node test/pwa.test.js && node test/catch-store.test.js && node test/catch-statistics.test.js && node test/species-catalog.test.js && node test/catch-backup.test.js && node test/water-store.test.js && node test/water-integration.test.js && node test/phase12b.test.js && node test/ux-polish.test.js && node test/private-beta.test.js && node test/beta-polish.test.js && node --test test/security.test.js"
   },
   "dependencies": {
     "dotenv": "^16.4.7",
