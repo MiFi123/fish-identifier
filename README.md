@@ -4,7 +4,7 @@ Progressive Web App zur KI-gestützten Fischbestimmung mit lokalem Fangbuch, Gew
 
 ## Development Start
 
-Voraussetzung ist Node.js 20 oder neuer.
+Voraussetzung ist Node.js 24.22.1 oder neuer innerhalb der 24er-Reihe.
 
 ```text
 npm install
@@ -28,7 +28,7 @@ Der Server beendet den Start bei einer unvollständigen produktionsähnlichen Ko
 
 ## Deployment-Anforderungen
 
-- Node.js 20+
+- Node.js 24.22.1 bis <25
 - HTTPS-Domain für Installation, Standortzugriff und zuverlässige PWA-Funktionen
 - keine Server-Datenbank erforderlich
 - persistente Fangbuch-, Gewässer-, GPS- und Backup-Daten bleiben im Browser des jeweiligen Geräts
@@ -56,7 +56,7 @@ Die App-Shell wird offline gecacht. Fotos, Backups, Fangbuch-/GPS-Daten und Anal
 ## Private Beta Deployment
 
 1. Repository bei einem beliebigen Node.js-Hostingdienst bereitstellen.
-2. Node.js 22 LTS auswählen; unterstützt werden Node.js 20 bis 24.
+2. Node.js 24 LTS ab 24.22.1 auswählen; `.node-version` legt die gepatchte Version fest.
 3. Installationsbefehl `npm ci` konfigurieren.
 4. Startbefehl `npm start` konfigurieren.
 5. die unten genannten Variablen im Secret-/Environment-Bereich des Hosters setzen – keine `.env` hochladen.

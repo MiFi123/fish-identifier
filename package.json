@@ -3,7 +3,7 @@
   "version": "0.6.2",
   "private": true,
   "description": "Fish Identifier MVP 0.6.2 – Beta Polish",
-  "engines": { "node": ">=20 <25" },
+  "engines": { "node": ">=24.22.1 <25" },
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "multer": "^2.0.2"
+    "express": "^4.22.3",
+    "multer": "^2.5.0"
   }
 }
