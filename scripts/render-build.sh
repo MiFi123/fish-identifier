@@ -8,3 +8,4 @@ python3 -m venv .export-venv
 .export-venv/bin/python -m pip install 'onnx==1.23.2'
 .export-venv/bin/python scripts/download-local-models.py
 .export-venv/bin/python scripts/export-local-models.py
+OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 .model-venv/bin/python scripts/smoke-hosted.py
