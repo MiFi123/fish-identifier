@@ -15,7 +15,7 @@ from PIL import Image, ImageOps
 
 ROOT = Path(__file__).resolve().parents[1]
 DIRECTORY = Path(os.environ.get('LOCAL_MODEL_DIR', ROOT / 'model-onnx'))
-Image.MAX_IMAGE_PIXELS = 20_000_000
+Image.MAX_IMAGE_PIXELS = 2_560_000
 warnings.simplefilter('error', Image.DecompressionBombWarning)
 MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32)[:, None, None]
 STD = np.array([0.229, 0.224, 0.225], dtype=np.float32)[:, None, None]
@@ -103,7 +103,7 @@ def analyze(encoded, loaded):
     started = time.perf_counter()
     labels, offsets, models = loaded
     image = Image.open(io.BytesIO(base64.b64decode(encoded, validate=True)))
-    if image.format not in ['JPEG', 'PNG', 'WEBP'] or min(image.size) < 32 or image.width * image.height > 20_000_000:
+    if image.format not in ['JPEG', 'PNG', 'WEBP'] or min(image.size) < 32 or max(image.size) > 1600 or image.width * image.height > 2_560_000:
         raise ValueError('Unsupported image')
     # JPEG draft decoding also bounds memory for callers outside our UI.
     image.draft('RGB', (1600, 1600))
@@ -169,7 +169,7 @@ def main():
             emit({'id': request['id'], 'result': analyze(request['image'], loaded)})
         except Exception as error:
             print(type(error).__name__ + ': hosted inference failed', file=sys.stderr, flush=True)
-            emit({'id': request.get('id'), 'error': 'Dieses Foto konnte nicht verarbeitet werden. Bitte ein JPEG-, PNG- oder WebP-Foto mit höchstens 20 Megapixeln versuchen.'})
+            emit({'id': request.get('id'), 'error': 'Dieses Foto konnte nicht verarbeitet werden. Bitte ein JPEG-, PNG- oder WebP-Foto erneut über die Testseite hochladen; dort wird es automatisch auf höchstens 1600 Pixel Kantenlänge verkleinert.'})
         finally:
             request.clear()
             line = None

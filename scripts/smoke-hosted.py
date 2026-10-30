@@ -30,4 +30,12 @@ blank = io.BytesIO()
 Image.new('RGB', (640, 400), (230, 230, 230)).save(blank, format='PNG')
 negative = hosted_worker.analyze(base64.b64encode(blank.getvalue()).decode(), models)
 assert negative['status'] == 'no_fish' and not negative['candidates']
+oversized = io.BytesIO()
+Image.new('RGB', (1601, 32), (230, 230, 230)).save(oversized, format='PNG')
+try:
+    hosted_worker.analyze(base64.b64encode(oversized.getvalue()).decode(), models)
+except ValueError:
+    pass
+else:
+    raise AssertionError('Oversized API image was not rejected before decoding')
 print(json.dumps({'example': {'top1': result['candidates'][0]['scientificName'], 'elapsedMs': result['elapsedMs']}, 'emptyImage': negative['status'], 'workerPeakMemoryMB': memory_mb(), 'scope': 'functional check only'}), flush=True)
