@@ -12,6 +12,7 @@ const { BENCHMARK_MODELS, runGeminiBenchmark } = require("./backend/gemini-bench
 const { AnalysisStore } = require("./backend/analysis-store");
 const { getSpeciesCatalog, findSpecies } = require("./backend/species-catalog");
 const { protectApi, validateUploadedImage, createWorkLimiter } = require('./backend/request-security');
+const { registerLocalLab } = require('./backend/local-lab-routes');
 
 const app = express();
 app.disable("x-powered-by");
@@ -57,6 +58,7 @@ const limitAnalysisWork = createWorkLimiter();
 app.locals.maxUploadSizeBytes = config.maxUploadSizeBytes;
 
 app.use('/api', protectApi);
+const localLabModel = registerLocalLab(app);
 app.use(express.static(path.join(__dirname, "public")));
 app.get("/api/health", (req, res) => res.json({ status: "ok", version: "0.6.2" }));
 app.get("/api/public-config", (req, res) => res.json({ feedbackEmail: config.publicFeedbackEmail }));
@@ -176,6 +178,7 @@ function startServer() {
   server.keepAliveTimeout = 5_000;
   const shutdown = (signal) => {
     console.log(`${signal}: Server wird beendet.`);
+    localLabModel?.close();
     server.close(() => process.exit(0));
     setTimeout(() => process.exit(1), 10_000).unref();
   };

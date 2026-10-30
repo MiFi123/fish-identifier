@@ -1,0 +1,22 @@
+{
+  "upstream": "https://github.com/Wye-Foundation/Fishial-Fish-Identification",
+  "classifier": {
+    "url": "https://storage.googleapis.com/fishial-ml-resources/classification_fishial_30_06_2023.zip",
+    "archive": "fishial-resnet18-v6.zip",
+    "directory": "resnet18-v6",
+    "sha256": "3862DC80D7205FF2A0CE6CF691427FA825CF07BBA56F1403C6A1FCD91D57FFB2",
+    "actualSpecies": 281
+  },
+  "segmentation": {
+    "url": "https://storage.googleapis.com/fishial-ml-resources/segmentator_fpn_res18_416_1.zip",
+    "archive": "segmentator-fpn.zip",
+    "directory": "segmentator-fpn",
+    "sha256": "A9E59731BDB9A64BD9789C9FA5AD4D601526D66EE3451546C3B3F44264C28CC4"
+  },
+  "detector": {
+    "url": "https://storage.googleapis.com/fishial-ml-resources/detector_v10_m3.zip",
+    "archive": "detector-v10.zip",
+    "directory": "detector-v10",
+    "sha256": "58C6F2FAFCE2DAB609C495E868447C4C317805317BC35DB77C03E089E730C6E9"
+  }
+}

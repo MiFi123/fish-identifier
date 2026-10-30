@@ -1,5 +1,7 @@
 # Fish Identifier MVP 0.6.2 – Beta Polish
 
+Der zusätzliche Fischmodell-Test unter `/versuch/` ist in [HOSTED-TRIAL.md](HOSTED-TRIAL.md) beschrieben. Die bestehende App und ihre lokalen Datenformate bleiben unverändert.
+
 Progressive Web App zur KI-gestützten Fischbestimmung mit lokalem Fangbuch, Gewässern, GPS-Daten und Backup. Fishial ist der primäre Dienst; bei niedriger Sicherheit kann die konfigurierte zweite KI eine zusätzliche Einschätzung liefern.
 
 ## Development Start

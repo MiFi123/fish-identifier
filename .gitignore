@@ -3,3 +3,11 @@ node_modules/
 .env
 npm-debug.log*
 .server-test.*.log
+.model-venv/
+.export-venv/
+model-source/
+model-onnx/
+__pycache__/
+.env.*
+!.env.example
+local-evaluation/

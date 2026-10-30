@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Fish Identifier · Fischmodell-Test</title>
+  <link rel="stylesheet" href="./local-lab.css">
+  <script src="./local-lab.js" defer></script>
+</head>
+<body>
+  <header class="topbar"><a href="/versuch/" class="brand"><span class="brand-icon" aria-hidden="true">≈</span> Fish Identifier</a><span class="pill">Fischmodell-Test</span></header>
+  <main>
+    <section class="intro">
+      <p class="eyebrow">FOTO + MERKMALE</p>
+      <h1>Welcher Fisch ist das?</h1>
+      <p class="lead">Eine erste Bestimmung auf unserem Testserver. Mit einem spezialisierten Fischmodell und den Merkmalen aus unserem Artenkatalog.</p>
+      <div class="benefits"><span>✓ Keine externen KI-Aufrufe</span><span>✓ Fotos werden nur zur Erkennung verarbeitet</span></div>
+    </section>
+    <div id="notice" class="notice" role="status">Das Fischmodell wird vorbereitet …</div>
+    <div class="workspace">
+      <section class="card photo-card" aria-labelledby="photo-title">
+        <div class="section-label">01 / FOTO</div>
+        <h2 id="photo-title">Zeig uns deinen Fisch</h2>
+        <p class="muted">Am besten ein einzelner Fisch, vollständig und von der Seite fotografiert.</p>
+        <label class="upload" id="upload-label" for="photo">
+          <span class="upload-symbol" aria-hidden="true">↥</span><strong>Foto auswählen</strong><span>JPEG, PNG oder WebP · bis 10 MB</span>
+        </label>
+        <input id="photo" type="file" accept="image/jpeg,image/png,image/webp" aria-label="Fischfoto auswählen">
+        <figure id="preview-wrap" hidden><img id="preview" alt="Dein ausgewähltes Fischfoto"><figcaption id="file-label"></figcaption></figure>
+        <div class="photo-actions"><button id="analyze" class="primary" disabled>Fisch bestimmen</button><button id="example" class="secondary">Beispiel testen</button></div>
+        <p id="example-note" class="small muted" hidden>Fishial-Testbild · erwartete Art: Schleie. Dieses Beispiel prüft die Funktion, nicht die allgemeine Erkennungsgenauigkeit.</p>
+        <div class="photo-footer"><span id="model-state" class="status-dot">Modell wird geladen</span><span id="timing"></span></div>
+        <details id="cutout-wrap" hidden><summary>So hat das Modell den Fisch freigestellt</summary><img id="cutout" alt="Vom Modell freigestellter Fisch" class="cutout"></details>
+      </section>
+      <section class="card results-card" aria-labelledby="results-title">
+        <div class="section-label">02 / BESTIMMUNG</div>
+        <h2 id="results-title">Mögliche Arten</h2>
+        <p class="muted" id="result-explanation">Hier erscheinen die Vorschläge. Du kannst auch ohne Foto mit den Merkmalen beginnen.</p>
+        <div id="empty-state" class="empty"><span aria-hidden="true">≋</span><p>Noch keine Bestimmung</p><small>Foto auswählen oder Merkmale eingrenzen.</small></div>
+        <div id="results" aria-live="polite"></div>
+        <div id="result-note" class="small result-note" hidden>Die Reihenfolge kombiniert Bildähnlichkeit und beantwortete Merkmale. Die Werte sind keine verlässlichen Trefferwahrscheinlichkeiten.</div>
+      </section>
+    </div>
+    <section class="card traits-card" aria-labelledby="traits-title">
+      <div class="traits-heading"><div><div class="section-label">03 / GENAUER HINSEHEN</div><h2 id="traits-title">Mit Merkmalen eingrenzen</h2><p class="muted">Nur beantworten, was du wirklich erkennen kannst. „Unklar“ beeinflusst das Ergebnis nicht.</p></div><button id="reset" class="text-button">Zurücksetzen</button></div>
+      <div id="questions" class="questions"></div>
+      <p id="traits-status" class="small muted" aria-live="polite">Noch keine Merkmale ausgewählt.</p>
+    </section>
+    <details class="method"><summary>Was dieser Versuch schon kann – und was wir noch prüfen</summary><p id="coverage">Der Artenumfang wird geladen.</p><p>Dein Foto wird an unseren Testserver übertragen, dort im Arbeitsspeicher ausgewertet und nicht dauerhaft gespeichert. Es wird an keinen externen KI-Dienst weitergegeben. Die Merkmalsregeln verwenden die 21 vorhandenen redaktionellen Artenprofile. Fehlende Angaben bleiben unbekannt. Ähnliche Arten können trotz passender Merkmale ununterscheidbar bleiben.</p><p>Die Fotoerkennung nutzt eine lokale Fischsuche, FPN-Freistellung und Fishials ResNet18-v6-Modell. Freistellung, Licht und Perspektive beeinflussen das Ergebnis. Bei mehreren Fischen wird nur der größte erkannte Bereich ausgewertet. Es gibt keine externe Zweitmeinung und keine automatische Entscheidung über die Verlässlichkeit einer Artbestimmung.</p><p>Für eine Qualitätsbewertung brauchen wir eigene, korrekt bestimmte Fotos, die nicht aus dem Modellpaket stammen.</p></details>
+    <footer>Experimentelle Bestimmung · ohne externe KI-Dienste</footer>
+  </main>
+</body>
+</html>
