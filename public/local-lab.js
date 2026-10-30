@@ -15,6 +15,22 @@ async function jsonResponse(response) {
   if (!response.ok) throw new Error(typeof data.error === 'string' ? data.error : data.error?.message || 'Die Anfrage konnte nicht verarbeitet werden.');
   return data;
 }
+async function preparePhoto(file) {
+  if (typeof createImageBitmap !== 'function') return file;
+  const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  try {
+    const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+    const context = canvas.getContext('2d');
+    if (!context) throw new Error('Das Foto konnte nicht vorbereitet werden.');
+    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.88));
+    if (!blob) throw new Error('Das Foto konnte nicht vorbereitet werden.');
+    return new File([blob], 'fischfoto.jpg', { type: 'image/jpeg' });
+  } finally { bitmap.close(); }
+}
 function traits() {
   return Object.fromEntries(questions.map(question => {
     const value = byId('trait-' + question.id).value;
@@ -98,7 +114,7 @@ async function analyze() {
   imageCandidates = []; renderResults([]); byId('cutout-wrap').hidden = true;
   setBusy(true); notice('Der Fisch wird freigestellt und mit den Referenzbildern des Modells verglichen …');
   try {
-    const form = new FormData(); form.append('image', selectedFile);
+    const form = new FormData(); form.append('image', await preparePhoto(selectedFile));
     const result = await jsonResponse(await fetch('/api/lab/analyze', { method: 'POST', body: form }));
     imageCandidates = result.candidates;
     byId('timing').textContent = `${(result.elapsedMs / 1000).toFixed(1)} s · 0 externe Aufrufe`;

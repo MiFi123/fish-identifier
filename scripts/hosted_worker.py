@@ -32,6 +32,8 @@ def session(name):
     options.inter_op_num_threads = 1
     options.enable_cpu_mem_arena = False
     options.enable_mem_pattern = False
+    options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_BASIC
+    options.add_session_config_entry('session.disable_prepacking', '1')
     options.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
     options.log_severity_level = 3
     return ort.InferenceSession(str(DIRECTORY / (name + '.onnx')), options, providers=['CPUExecutionProvider'])
@@ -103,6 +105,8 @@ def analyze(encoded, loaded):
     image = Image.open(io.BytesIO(base64.b64decode(encoded, validate=True)))
     if image.format not in ['JPEG', 'PNG', 'WEBP'] or min(image.size) < 32 or image.width * image.height > 20_000_000:
         raise ValueError('Unsupported image')
+    # JPEG draft decoding also bounds memory for callers outside our UI.
+    image.draft('RGB', (1600, 1600))
     image = ImageOps.exif_transpose(image).convert('RGB')
     image.thumbnail((1600, 1600))
     boxes = detections(image, models['detector'])
@@ -169,6 +173,10 @@ def main():
         finally:
             request.clear()
             line = None
+            if sys.platform.startswith('linux'):
+                # Return freed image/activation buffers to the small server.
+                import ctypes
+                ctypes.CDLL(None).malloc_trim(0)
 
 if __name__ == '__main__':
     main()

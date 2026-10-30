@@ -14,6 +14,8 @@ Der Build installiert eine separate ONNX-Laufzeit in `.model-venv`. Die umfangre
 
 Zur Laufzeit werden ausschließlich ONNX Runtime, NumPy und Pillow importiert. Ein einzelner Modellprozess mit jeweils einer Bildanalyse begrenzt den Speicherverbrauch. Der Hauptserver und das bestehende Fangbuch bleiben unabhängig erreichbar, wenn das Modell noch startet oder ausfällt. Der Test hat eigene IP-Limits und Same-Origin-Prüfungen. Bilder werden nur im Arbeitsspeicher ausgewertet und nicht dauerhaft gespeichert oder an externe KI-Dienste gesendet.
 
+Die Browseroberfläche verkleinert Fotos vor der Übertragung auf maximal 1600 Pixel Kantenlänge und erstellt ein JPEG ohne Original-Metadaten. Die Modelllaufzeit verzichtet auf zusätzliche vorgepackte Gewichtskopien und gibt freigegebene Bildpuffer unter Linux an das Betriebssystem zurück. Für direkte API-Aufrufe bleiben die Bildgrößenlimits aktiv.
+
 Die UI weist auf die Übertragung zum Testserver hin. Die vorhandenen Profilarten, Modellgrenzen und nicht kalibrierten Bildabstände bleiben sichtbar. Es gibt keine Aussage über eine nachgewiesene Erkennungsgenauigkeit. Der Test benötigt eine Verbindung zum eigenen Server; die Modelle laufen in dieser Variante nicht direkt auf dem Handy.
 
 Prüfen:
